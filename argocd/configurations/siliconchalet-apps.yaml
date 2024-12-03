@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: siliconchalet
+spec:
+  generators:
+  - list:
+      elements:
+      - environment: development
+      - environment: testing
+      - environment: production
+  template:
+    metadata:
+      name: siliconchalet-app-{{environment}}
+      annotations:
+        kargo.akuity.io/authorized-stage: siliconchalet:{{environment}}
+    spec:
+      project: siliconchalet
+      source:
+        repoURL: ${REPOSITORY_URL}
+        targetRevision: main
+        path: overlays/{{environment}}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: siliconchalet-app-{{environment}}
+      syncPolicy:
+        syncOptions:
+        - CreateNamespace=true

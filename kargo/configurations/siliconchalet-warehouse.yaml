@@ -1,0 +1,11 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: siliconchalet-app
+  namespace: siliconchalet
+spec:
+  subscriptions:
+  - image:
+      repoURL: public.ecr.aws/nginx/nginx
+      imageSelectionStrategy: SemVer
+      semverConstraint: ~1.27.0

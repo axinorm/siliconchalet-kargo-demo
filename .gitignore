@@ -1,0 +1,8 @@
+.venv
+.vscode
+.DS_Store
+.envrc
+
+bin/*
+!bin/.gitkeep
+tmp

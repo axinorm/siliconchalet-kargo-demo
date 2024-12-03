@@ -1,0 +1,63 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: production
+  namespace: siliconchalet
+spec:
+  requestedFreight:
+  - origin:
+      kind: Warehouse
+      name: siliconchalet-app
+    sources:
+      stages:
+      - testing
+  promotionTemplate:
+    spec:
+      steps:
+      - uses: git-clone
+        config:
+          repoURL: ${REPOSITORY_URL}
+          checkout:
+          - branch: main
+            path: ./repo
+      - uses: helm-update-image
+        as: update-image
+        config:
+          path: ./repo/values-production.yaml
+          images:
+          - image: public.ecr.aws/nginx/nginx
+            key: image.tag
+            value: Tag
+      - uses: git-commit
+        as: commit
+        config:
+          path: ./repo
+          messageFromSteps:
+          - update-image
+      # Pushing into a new branch
+      - uses: git-push
+        as: push
+        config:
+          path: ./repo
+          targetBranch: chore/production/update-image
+      # Creating a Pull Request
+      - uses: git-open-pr
+        as: open-pr
+        config:
+          provider: github
+          repoURL: ${REPOSITORY_URL}
+          sourceBranchFromStep: push
+          targetBranch: main
+      # Waiting until merge
+      - uses: git-wait-for-pr
+        as: wait-for-pr
+        config:
+          provider: github
+          repoURL: ${REPOSITORY_URL}
+          prNumberFromStep: open-pr
+      - uses: argocd-update
+        config:
+          apps:
+          - name: siliconchalet-app-production
+            sources:
+            - repoURL: ${REPOSITORY_URL}

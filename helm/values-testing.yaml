@@ -1,0 +1,21 @@
+replicaCount: 2
+
+image:
+  repository: public.ecr.aws/nginx/nginx
+  tag: 1.27.0
+
+html:
+  mainText: "Testing environment"
+  cssContent: |
+    body {
+      background-color: blue;
+    }
+
+    h1, h2 {
+      color: white;
+      text-align: center;
+    }
+
+    div {
+      text-align: center;
+    }
