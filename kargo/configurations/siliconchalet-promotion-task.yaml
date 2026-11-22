@@ -1,0 +1,41 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: PromotionTask
+metadata:
+  name: promote-helm-app
+  namespace: siliconchalet
+spec:
+  vars:
+  - name: repoURL
+  - name: imageRepo
+    value: public.ecr.aws/nginx/nginx
+  steps:
+  - uses: git-clone
+    config:
+      repoURL: ${{ vars.repoURL }}
+      checkout:
+      - branch: main
+        path: ./repo
+  - uses: yaml-update
+    as: update-image
+    config:
+      path: ./repo/values-${{ ctx.stage }}.yaml
+      updates:
+      - key: image.tag
+        value: ${{ imageFrom(vars.imageRepo).Tag }}
+  - uses: git-commit
+    as: commit
+    config:
+      path: ./repo
+      message: ${{ task.outputs['update-image'].commitMessage }}
+  - uses: git-push
+    as: push
+    config:
+      path: ./repo
+      targetBranch: main
+  - uses: argocd-update
+    config:
+      apps:
+      - name: siliconchalet-app-${{ ctx.stage }}
+        sources:
+        - repoURL: ${{ vars.repoURL }}
+          desiredRevision: ${{ task.outputs.push.commit }}

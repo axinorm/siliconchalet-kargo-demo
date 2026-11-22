@@ -48,7 +48,7 @@ stringData:
 EOF
 
 (set -x; kubectl -n argocd apply -f ./argocd/configurations/siliconchalet-appproject.yaml)
-(set -x; envsubst < ./argocd/configurations/siliconchalet-apps.yaml | kubectl -n argocd apply -f -)
+(set -x; envsubst '$REPOSITORY_URL' < ./argocd/configurations/siliconchalet-apps.yaml | kubectl -n argocd apply -f -)
 
 read -rs
 
@@ -76,6 +76,7 @@ echo "[INFO] Setup Kargo"
 echo
 
 (set -x; kargo apply -f ./kargo/configurations/siliconchalet-project.yaml)
+(set -x; kargo apply -f ./kargo/configurations/siliconchalet-projectconfig.yaml)
 
 cat <<EOF | kargo apply -f -
 apiVersion: v1
@@ -99,9 +100,10 @@ echo
 echo "[INFO] Create Stages"
 echo
 (set -x; kargo apply -f ./kargo/configurations/siliconchalet-warehouse.yaml)
-(set -x; envsubst < ./kargo/configurations/siliconchalet-development-stage.yaml | kargo apply -f -)
-(set -x; envsubst < ./kargo/configurations/siliconchalet-testing-stage.yaml | kargo apply -f -)
-(set -x; envsubst < ./kargo/configurations/siliconchalet-production-stage.yaml | kargo apply -f -)
+(set -x; kargo apply -f ./kargo/configurations/siliconchalet-promotion-task.yaml)
+(set -x; envsubst '$REPOSITORY_URL' < ./kargo/configurations/siliconchalet-development-stage.yaml | kargo apply -f -)
+(set -x; envsubst '$REPOSITORY_URL' < ./kargo/configurations/siliconchalet-testing-stage.yaml | kargo apply -f -)
+(set -x; envsubst '$REPOSITORY_URL' < ./kargo/configurations/siliconchalet-production-stage.yaml | kargo apply -f -)
 
 read -rs
 

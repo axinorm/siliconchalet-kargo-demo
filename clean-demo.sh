@@ -29,6 +29,8 @@ echo
 (set -x; kubectl delete -f ./kargo/configurations/siliconchalet-production-stage.yaml --ignore-not-found --force --grace-period 0)
 (set -x; kubectl delete -f ./kargo/configurations/siliconchalet-testing-stage.yaml --ignore-not-found --force --grace-period 0)
 (set -x; kubectl delete -f ./kargo/configurations/siliconchalet-development-stage.yaml --ignore-not-found --force --grace-period 0)
+(set -x; kubectl delete -f ./kargo/configurations/siliconchalet-promotion-task.yaml --ignore-not-found --force --grace-period 0)
 (set -x; kubectl delete -f ./kargo/configurations/siliconchalet-warehouse.yaml --ignore-not-found --force --grace-period 0)
+(set -x; kubectl delete -f ./kargo/configurations/siliconchalet-projectconfig.yaml --ignore-not-found --force --grace-period 0)
 
 killall -q kubectl || true

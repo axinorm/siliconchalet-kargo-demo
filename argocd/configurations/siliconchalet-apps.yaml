@@ -19,7 +19,10 @@ spec:
       source:
         repoURL: ${REPOSITORY_URL}
         targetRevision: main
-        path: overlays/{{environment}}
+        path: .
+        helm:
+          valueFiles:
+          - values-{{environment}}.yaml
       destination:
         server: https://kubernetes.default.svc
         namespace: siliconchalet-app-{{environment}}

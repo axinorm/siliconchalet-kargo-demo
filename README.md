@@ -14,7 +14,7 @@ The Kargo binary is required for the demo in order to deploy configuration such 
 You can download it with the following commands:
 
 ```sh
-KARGO_VERSION=1.0.3
+KARGO_VERSION=1.12.6
 ARCH=$(uname -m)
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 [ "$ARCH" = "x86_64" ] && ARCH=amd64

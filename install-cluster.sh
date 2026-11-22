@@ -3,9 +3,9 @@
 set -e
 set -o pipefail
 
-CERT_MANAGER_CHART_VERSION=1.16.1
-ARGO_CD_CHART_VERSION=7.7.0
-KARGO_CHART_VERSION=1.0.3
+CERT_MANAGER_CHART_VERSION=v1.21.3
+ARGO_CD_CHART_VERSION=10.18.0
+KARGO_CHART_VERSION=1.12.6
 
 echo
 echo "###########################"
@@ -20,8 +20,8 @@ echo "[INFO] Install cert-manager"
 echo "==========================="
 echo
 
-helm upgrade --install cert-manager cert-manager \
-  --repo https://charts.jetstack.io \
+helm upgrade --install cert-manager \
+  oci://quay.io/jetstack/charts/cert-manager \
   --version ${CERT_MANAGER_CHART_VERSION} \
   --namespace cert-manager \
   --create-namespace \

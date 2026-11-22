@@ -13,51 +13,55 @@ spec:
       - testing
   promotionTemplate:
     spec:
+      vars:
+      - name: repoURL
+        value: ${REPOSITORY_URL}
+      - name: imageRepo
+        value: public.ecr.aws/nginx/nginx
       steps:
       - uses: git-clone
         config:
-          repoURL: ${REPOSITORY_URL}
+          repoURL: ${{ vars.repoURL }}
           checkout:
           - branch: main
             path: ./repo
-      - uses: helm-update-image
+      - uses: yaml-update
         as: update-image
         config:
-          path: ./repo/values-production.yaml
-          images:
-          - image: public.ecr.aws/nginx/nginx
-            key: image.tag
-            value: Tag
+          path: ./repo/values-${{ ctx.stage }}.yaml
+          updates:
+          - key: image.tag
+            value: ${{ imageFrom(vars.imageRepo).Tag }}
       - uses: git-commit
         as: commit
         config:
           path: ./repo
-          messageFromSteps:
-          - update-image
-      # Pushing into a new branch
+          message: ${{ outputs['update-image'].commitMessage }}
+      # Pushing into a dynamically generated branch
       - uses: git-push
         as: push
         config:
           path: ./repo
-          targetBranch: chore/production/update-image
+          generateTargetBranch: true
       # Creating a Pull Request
       - uses: git-open-pr
         as: open-pr
         config:
           provider: github
-          repoURL: ${REPOSITORY_URL}
-          sourceBranchFromStep: push
+          repoURL: ${{ vars.repoURL }}
+          sourceBranch: ${{ outputs.push.branch }}
           targetBranch: main
       # Waiting until merge
       - uses: git-wait-for-pr
         as: wait-for-pr
         config:
           provider: github
-          repoURL: ${REPOSITORY_URL}
-          prNumberFromStep: open-pr
+          repoURL: ${{ vars.repoURL }}
+          prNumber: ${{ outputs['open-pr'].pr.id }}
       - uses: argocd-update
         config:
           apps:
-          - name: siliconchalet-app-production
+          - name: siliconchalet-app-${{ ctx.stage }}
             sources:
-            - repoURL: ${REPOSITORY_URL}
+            - repoURL: ${{ vars.repoURL }}
+              desiredRevision: ${{ outputs['wait-for-pr'].commit }}

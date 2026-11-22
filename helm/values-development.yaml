@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: public.ecr.aws/nginx/nginx
-  tag: 1.27.0
+  tag: 1.31.0
 
 html:
   mainText: "Development environment"
